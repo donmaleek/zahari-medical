@@ -9,12 +9,12 @@ const axios = require('axios');
 const crypto = require('crypto');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 10000;
 
 // Middleware
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, '.')));
-app.use(express.static(path.join(__dirname)));
+app.use(express.static(path.join(__dirname, 'public')));
 
 // PostgreSQL Connection Pool for Render.com
 const pool = new Pool({
