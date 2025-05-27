@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Book Appointment - Zahari Medical Clinical</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+</head>
+<body>
+    <!-- Header (same as index.html but with different active link) -->
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+            <a href="index.html">
+                <div class="logo-container">
+                    <img src="assets/logo1.png" alt="Zahari Medical Logo" class="logo-img">
+                    <h1>Zahari Medical</h1>
+                </div>
+            </a>
+        </div>
+
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="about.html">About Us</a></li>
+                    <li><a href="services.html">Services</a></li>
+                    <li><a href="doctors.html">Doctors</a></li>
+                    <li><a href="patient-portal.html" class="active">Patient Portal</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+            </nav>
+
+            <div class="header-actions">
+                <a href="appointment.html" class="btn btn-primary">
+                    <i class="fas fa-calendar-check"></i> Appointment
+                </a>
+            </div>
+
+            <button class="mobile-menu-toggle">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </header>
+
+  <!-- Page Hero -->
+  <section class="page-hero">
+    <div class="container">
+      <h1>Book an Appointment</h1>
+      <p>Schedule your visit with our specialists</p>
+    </div>
+  </section>
+
+  <!-- Appointment Form Section -->
+  <main class="page-content">
+    <section class="appointment-section">
+      <div class="container">
+        <div class="appointment-container">
+          <!-- Left: Appointment Form -->
+          <div class="appointment-form">
+            <h2>Schedule Your Visit</h2>
+            <p>Fill out the form below to book your appointment</p>
+
+            <form id="appointmentForm">
+              <!-- Step 1 -->
+              <div class="form-step active" id="step1">
+                <div class="form-group">
+                  <label for="appointmentType">Appointment Type</label>
+                  <select id="appointmentType" required>
+                    <option value="">Select appointment type</option>
+                    <option value="consultation">Consultation</option>
+                    <option value="follow-up">Follow-up</option>
+                    <option value="checkup">Routine Checkup</option>
+                    <option value="emergency">Emergency</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="department">Department</label>
+                  <select id="department" required>
+                    <option value="">Select department</option>
+                    <option value="cardiology">Cardiology</option>
+                    <option value="neurology">Neurology</option>
+                    <option value="orthopedics">Orthopedics</option>
+                    <option value="pediatrics">Pediatrics</option>
+                    <option value="general">General Medicine</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="doctor">Preferred Doctor (Optional)</label>
+                  <select id="doctor">
+                    <option value="">Any available doctor</option>
+                    <option value="dr-johnson">Dr. Sarah Johnson</option>
+                    <option value="dr-chen">Dr. Michael Chen</option>
+                    <option value="dr-rahman">Dr. Amina Rahman</option>
+                  </select>
+                </div>
+
+                <div class="form-actions">
+                  <button type="button" class="btn btn-primary next-step">Next</button>
+                </div>
+              </div>
+
+              <!-- Step 2 -->
+              <div class="form-step" id="step2">
+                <div class="form-group">
+                  <label for="appointmentDate">Appointment Date</label>
+                  <input type="text" id="appointmentDate" placeholder="Select date" required />
+                </div>
+
+                <div class="form-group">
+                  <label for="appointmentTime">Preferred Time</label>
+                  <select id="appointmentTime" required>
+                    <option value="">Select time</option>
+                    <option value="morning">Morning (8am - 12pm)</option>
+                    <option value="afternoon">Afternoon (12pm - 4pm)</option>
+                    <option value="evening">Evening (4pm - 7pm)</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="urgency">Urgency Level</label>
+                  <select id="urgency" required>
+                    <option value="routine">Routine</option>
+                    <option value="urgent">Urgent</option>
+                    <option value="emergency">Emergency</option>
+                  </select>
+                </div>
+
+                <div class="form-actions">
+                  <button type="button" class="btn btn-outline prev-step">Back</button>
+                  <button type="button" class="btn btn-primary next-step">Next</button>
+                </div>
+              </div>
+
+              <!-- Step 3 -->
+              <div class="form-step" id="step3">
+                <div class="form-group">
+                  <label for="fullName">Full Name</label>
+                  <input type="text" id="fullName" required />
+                </div>
+
+                <div class="form-group">
+                  <label for="email">Email Address</label>
+                  <input type="email" id="email" required />
+                </div>
+
+                <div class="form-group">
+                  <label for="phone">Phone Number</label>
+                  <input type="tel" id="phone" required />
+                </div>
+
+                <div class="form-group">
+                  <label for="dob">Date of Birth</label>
+                  <input type="text" id="dob" placeholder="YYYY-MM-DD" required />
+                </div>
+
+                <div class="form-group">
+                  <label for="insurance">Insurance Provider (Optional)</label>
+                  <input type="text" id="insurance" />
+                </div>
+
+                <div class="form-actions">
+                  <button type="button" class="btn btn-outline prev-step">Back</button>
+                  <button type="submit" class="btn btn-primary">Submit Appointment</button>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <!-- Right: Appointment Info -->
+          <div class="appointment-info">
+            <div class="info-card">
+              <h3>Appointment Information</h3>
+              <ul>
+                <li>
+                  <i class="fas fa-clock"></i>
+                  <div>
+                    <h4>Working Hours</h4>
+                    <p>Monday - Friday: 8:00am - 7:00pm</p>
+                    <p>Saturday - Sunday: 9:00am - 5:00pm</p>
+                  </div>
+                </li>
+                <li>
+                  <i class="fas fa-phone-alt"></i>
+                  <div>
+                    <h4>Need Help?</h4>
+                    <p>Call our appointment desk</p>
+                    <p><strong>+254 705058912</strong></p>
+                  </div>
+                </li>
+                <li>
+                  <i class="fas fa-info-circle"></i>
+                  <div>
+                    <h4>What to Bring</h4>
+                    <p>Insurance card</p>
+                    <p>Photo ID</p>
+                    <p>List of medications</p>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+    <!-- Footer Section -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-about">
+                    <div class="logo">
+                        <a href="index.html">
+                            <h2>Zahari Medical</h2>
+                            <span></span>
+                        </a>
+                    </div>
+                    <p>Providing modern healthcare solutions with compassion and cutting-edge technology since 2010.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-links">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="about.html">About Us</a></li>
+                        <li><a href="services.html">Services</a></li>
+                        <li><a href="doctors.html">Doctors</a></li>
+                        <li><a href="departments.html">Departments</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-services">
+                    <h3>Our Services</h3>
+                    <ul>
+                        <li><a href="services.html#cardiology">Cardiology</a></li>
+                        <li><a href="services.html#neurology">Neurology</a></li>
+                        <li><a href="services.html#orthopedics">Orthopedics</a></li>
+                        <li><a href="services.html#pulmonology">Pulmonology</a></li>
+                        <li><a href="services.html#pediatrics">Pediatrics</a></li>
+                        <li><a href="services.html#radiology">Radiology</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-contact">
+                    <h3>Contact Us</h3>
+                    <ul>
+                        <li>
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>Jomvu Narcol, Mombasa, KE</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-phone-alt"></i>
+                            <span>+254 705058912</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-envelope"></i>
+                            <span>info@zaharimedical.com</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-clock"></i>
+                            <span>Mon-Fri: 8:00am - 7:00pm<br>Sat-Sun: 9:00am - 5:00pm</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; <span id="current-year"></span> Zahari Medical. All Rights Reserved.</p>
+                <div class="footer-legal">
+                    <a href="privacy.html">Privacy Policy</a>
+                    <a href="terms.html">Terms of Service</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+  <!-- Scripts -->
+  <script src="js/main.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script>
+    // Initialize date pickers
+    flatpickr("#appointmentDate", {
+      minDate: "today",
+      maxDate: new Date().fp_incr(30),
+      dateFormat: "Y-m-d",
+      disable: [date => (date.getDay() === 0 || date.getDay() === 6)]
+    });
+
+    flatpickr("#dob", {
+      maxDate: "today",
+      dateFormat: "Y-m-d"
+    });
+
+    // Step Navigation
+    document.querySelectorAll('.next-step').forEach(button => {
+      button.addEventListener('click', function () {
+        const currentStep = this.closest('.form-step');
+        const nextStepId = this.getAttribute('data-next') || currentStep.nextElementSibling.id;
+
+        if (validateStep(currentStep.id)) {
+          currentStep.classList.remove('active');
+          document.getElementById(nextStepId).classList.add('active');
+        }
+      });
+    });
+
+    document.querySelectorAll('.prev-step').forEach(button => {
+      button.addEventListener('click', function () {
+        const currentStep = this.closest('.form-step');
+        const prevStepId = this.getAttribute('data-prev') || currentStep.previousElementSibling.id;
+
+        currentStep.classList.remove('active');
+        document.getElementById(prevStepId).classList.add('active');
+      });
+    });
+
+    function validateStep(stepId) {
+      const step = document.getElementById(stepId);
+      const inputs = step.querySelectorAll('input[required], select[required]');
+      let isValid = true;
+
+      inputs.forEach(input => {
+        if (!input.value) {
+          input.classList.add('error');
+          isValid = false;
+        } else {
+          input.classList.remove('error');
+        }
+      });
+
+      step.querySelector('.error-message')?.remove();
+
+      if (!isValid) {
+        const errorMsg = document.createElement('p');
+        errorMsg.className = 'error-message';
+        errorMsg.textContent = 'Please fill in all required fields';
+        errorMsg.style.color = 'var(--accent-color)';
+        errorMsg.style.marginTop = '1rem';
+        step.appendChild(errorMsg);
+      }
+
+      return isValid;
+    }
+
+    // Handle submission
+    document.getElementById('appointmentForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      if (validateStep('step3')) {
+        const formData = {
+          type: document.getElementById('appointmentType').value,
+          department: document.getElementById('department').value,
+          doctor: document.getElementById('doctor').value,
+          date: document.getElementById('appointmentDate').value,
+          time: document.getElementById('appointmentTime').value,
+          urgency: document.getElementById('urgency').value,
+          name: document.getElementById('fullName').value,
+          email: document.getElementById('email').value,
+          phone: document.getElementById('phone').value,
+          dob: document.getElementById('dob').value,
+          insurance: document.getElementById('insurance').value
+        };
+
+        console.log('Form submitted:', formData);
+
+        const formContainer = document.querySelector('.appointment-form');
+        formContainer.innerHTML = `
+          <div class="appointment-confirmation">
+            <div class="confirmation-icon">
+              <i class="fas fa-check-circle"></i>
+            </div>
+            <h2>Appointment Scheduled!</h2>
+            <p>Thank you for booking. A confirmation email will be sent shortly.</p>
+          </div>
+        `;
+      }
+    });
+  </script>
+</body>
+</html>

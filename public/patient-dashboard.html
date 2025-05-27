@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Dashboard - Zahari Medical Clinical</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<body>
+    <!-- Dashboard Header (Modified from main header) -->
+    <header class="header dashboard-header">
+        <div class="container">
+            <div class="logo">
+                <a href="index.html">
+                    <h1>Zahari Medical</h1>
+                    <span>Clinical</span>
+                </a>
+            </div>
+            
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="patient-dashboard.html" class="active"><i class="fas fa-home"></i> Dashboard</a></li>
+                    <li><a href="patient-appointments.html"><i class="fas fa-calendar-check"></i> Appointments</a></li>
+                    <li><a href="patient-records.html"><i class="fas fa-file-medical"></i> Medical Records</a></li>
+                    <li><a href="payment.html"><i class="fas fa-money-bill-wave"></i> Pay Bills</a></li>
+                    <li><a href="patient-settings.html"><i class="fas fa-user-cog"></i> Profile</a></li>
+                </ul>
+            </nav>
+            
+            <div class="header-actions">
+                <button id="logoutBtn" class="btn btn-outline">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+            
+            <button class="mobile-menu-toggle">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Dashboard Hero -->
+    <section class="dashboard-hero">
+        <div class="container">
+            <div class="welcome-message">
+                <h1>Welcome back, <span id="patientName">Patient</span>!</h1>
+                <p>Here's your health overview</p>
+            </div>
+            <div class="quick-actions">
+                <a href="appointment.html" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> New Appointment
+                </a>
+                <a href="payment.html" class="btn btn-accent">
+                    <i class="fas fa-money-bill-wave"></i> Pay Bill
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Dashboard Main Content -->
+    <main class="dashboard-content">
+        <div class="container">
+            <!-- Stats Overview -->
+            <section class="dashboard-section">
+                <h2><i class="fas fa-chart-line"></i> Your Health Overview</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-calendar"></i>
+                        </div>
+                        <h3>Upcoming Appointments</h3>
+                        <p class="stat-value" id="upcomingAppointments">2</p>
+                        <a href="patient-appointments.html" class="btn-link">View All <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-prescription-bottle-alt"></i>
+                        </div>
+                        <h3>Active Prescriptions</h3>
+                        <p class="stat-value" id="activePrescriptions">3</p>
+                        <a href="patient-records.html#prescriptions" class="btn-link">View All <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-file-invoice-dollar"></i>
+                        </div>
+                        <h3>Pending Payments</h3>
+                        <p class="stat-value" id="pendingPayments">KES 2,500</p>
+                        <a href="payment.html" class="btn-link">Pay Now <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-heartbeat"></i>
+                        </div>
+                        <h3>Last Checkup</h3>
+                        <p class="stat-value" id="lastCheckup">15 days ago</p>
+                        <a href="patient-records.html" class="btn-link">View History <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Upcoming Appointments -->
+            <section class="dashboard-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-calendar-day"></i> Upcoming Appointments</h2>
+                    <a href="patient-appointments.html" class="btn-link">View All <i class="fas fa-arrow-right"></i></a>
+                </div>
+                
+                <div class="appointments-list">
+                    <div class="appointment-card">
+                        <div class="appointment-info">
+                            <h3>Dr. Sarah Johnson</h3>
+                            <p class="department">Cardiology</p>
+                            <p class="date-time">
+                                <i class="fas fa-calendar-alt"></i> Tomorrow, 10:30 AM
+                            </p>
+                        </div>
+                        <div class="appointment-actions">
+                            <a href="#" class="btn btn-outline btn-small">Reschedule</a>
+                            <a href="#" class="btn btn-accent btn-small">Directions</a>
+                        </div>
+                    </div>
+                    
+                    <div class="appointment-card">
+                        <div class="appointment-info">
+                            <h3>Dr. Michael Chen</h3>
+                            <p class="department">Neurology</p>
+                            <p class="date-time">
+                                <i class="fas fa-calendar-alt"></i> June 15, 2:00 PM
+                            </p>
+                        </div>
+                        <div class="appointment-actions">
+                            <a href="#" class="btn btn-outline btn-small">Reschedule</a>
+                            <a href="#" class="btn btn-accent btn-small">Directions</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Recent Medical Activity -->
+            <section class="dashboard-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-history"></i> Recent Activity</h2>
+                </div>
+                
+                <div class="activity-timeline">
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            <i class="fas fa-file-prescription"></i>
+                        </div>
+                        <div class="activity-content">
+                            <h3>New Prescription</h3>
+                            <p class="activity-date">June 1, 2023</p>
+                            <p>Dr. Johnson prescribed Amlodipine for blood pressure</p>
+                        </div>
+                    </div>
+                    
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            <i class="fas fa-vial"></i>
+                        </div>
+                        <div class="activity-content">
+                            <h3>Lab Results</h3>
+                            <p class="activity-date">May 28, 2023</p>
+                            <p>Blood test results are now available</p>
+                            <a href="#" class="btn-link">View Results <i class="fas fa-arrow-right"></i></a>
+                        </div>
+                    </div>
+                    
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            <i class="fas fa-money-bill-wave"></i>
+                        </div>
+                        <div class="activity-content">
+                            <h3>Payment Received</h3>
+                            <p class="activity-date">May 25, 2023</p>
+                            <p>KES 5,000 for consultation fee</p>
+                            <a href="#" class="btn-link">View Receipt <i class="fas fa-arrow-right"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer Section -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-about">
+                    <div class="logo">
+                        <a href="index.html">
+                            <h2>Zahari Medical</h2>
+                            <span></span>
+                        </a>
+                    </div>
+                    <p>Providing modern healthcare solutions with compassion and cutting-edge technology since 2010.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-links">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="about.html">About Us</a></li>
+                        <li><a href="services.html">Services</a></li>
+                        <li><a href="doctors.html">Doctors</a></li>
+                        <li><a href="departments.html">Departments</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-services">
+                    <h3>Our Services</h3>
+                    <ul>
+                        <li><a href="services.html#cardiology">Cardiology</a></li>
+                        <li><a href="services.html#neurology">Neurology</a></li>
+                        <li><a href="services.html#orthopedics">Orthopedics</a></li>
+                        <li><a href="services.html#pulmonology">Pulmonology</a></li>
+                        <li><a href="services.html#pediatrics">Pediatrics</a></li>
+                        <li><a href="services.html#radiology">Radiology</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-contact">
+                    <h3>Contact Us</h3>
+                    <ul>
+                        <li>
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>Jomvu Narcol, Mombasa, KE</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-phone-alt"></i>
+                            <span>+254 705058912</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-envelope"></i>
+                            <span>info@zaharimedical.com</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-clock"></i>
+                            <span>Mon-Fri: 8:00am - 7:00pm<br>Sat-Sun: 9:00am - 5:00pm</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; <span id="current-year"></span> Zahari Medical. All Rights Reserved.</p>
+                <div class="footer-legal">
+                    <a href="privacy.html">Privacy Policy</a>
+                    <a href="terms.html">Terms of Service</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/patient-dashboard.js"></script>
+</body>
+</html>

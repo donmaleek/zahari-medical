@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Successful - Zahari Medical Clinical</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Reuse header -->
+    <header class="header">
+        <!-- Same as other pages -->
+    </header>
+
+    <!-- Success Hero -->
+    <section class="page-hero">
+        <div class="container">
+            <h1>Payment Successful</h1>
+            <p>Thank you for your payment</p>
+        </div>
+    </section>
+
+    <!-- Success Content -->
+    <main class="page-content">
+        <section class="success-section">
+            <div class="container">
+                <div class="success-card">
+                    <div class="success-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <h2>Your payment was received!</h2>
+                    <div class="success-details">
+                        <p><strong>Amount:</strong> KES <span id="successAmount">500.00</span></p>
+                        <p><strong>Transaction ID:</strong> <span id="transactionId">MPESA12345</span></p>
+                        <p><strong>Date:</strong> <span id="paymentDate"></span></p>
+                    </div>
+                    <p>A receipt has been sent to your phone via SMS.</p>
+                    <div class="success-actions">
+                        <a href="index.html" class="btn btn-primary">Return Home</a>
+                        <a href="patient-portal.html" class="btn btn-outline">View in Portal</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer Section -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-about">
+                    <div class="logo">
+                        <a href="index.html">
+                            <h2>Zahari Medical</h2>
+                            <span></span>
+                        </a>
+                    </div>
+                    <p>Providing modern healthcare solutions with compassion and cutting-edge technology since 2010.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-links">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="about.html">About Us</a></li>
+                        <li><a href="services.html">Services</a></li>
+                        <li><a href="doctors.html">Doctors</a></li>
+                        <li><a href="departments.html">Departments</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-services">
+                    <h3>Our Services</h3>
+                    <ul>
+                        <li><a href="services.html#cardiology">Cardiology</a></li>
+                        <li><a href="services.html#neurology">Neurology</a></li>
+                        <li><a href="services.html#orthopedics">Orthopedics</a></li>
+                        <li><a href="services.html#pulmonology">Pulmonology</a></li>
+                        <li><a href="services.html#pediatrics">Pediatrics</a></li>
+                        <li><a href="services.html#radiology">Radiology</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-contact">
+                    <h3>Contact Us</h3>
+                    <ul>
+                        <li>
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>Jomvu Narcol, Mombasa, KE</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-phone-alt"></i>
+                            <span>+254 705058912</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-envelope"></i>
+                            <span>info@zaharimedical.com</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-clock"></i>
+                            <span>Mon-Fri: 8:00am - 7:00pm<br>Sat-Sun: 9:00am - 5:00pm</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; <span id="current-year"></span> Zahari Medical. All Rights Reserved.</p>
+                <div class="footer-legal">
+                    <a href="privacy.html">Privacy Policy</a>
+                    <a href="terms.html">Terms of Service</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Display current date
+        document.getElementById('paymentDate').textContent = new Date().toLocaleDateString();
+        
+        // You can parse URL parameters to show actual payment details
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('amount')) {
+            document.getElementById('successAmount').textContent = 
+                parseFloat(urlParams.get('amount')).toFixed(2);
+        }
+        if (urlParams.has('txn_id')) {
+            document.getElementById('transactionId').textContent = urlParams.get('txn_id');
+        }
+    </script>
+</body>
+</html>
