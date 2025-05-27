@@ -2,8 +2,10 @@ services:
   - type: web
     name: zahari-medical
     runtime: node
-    buildCommand: npm install --production
-    startCommand: npm start
+    buildCommand: npm install
+    startCommand: npm start  # Uses package.json script
     envVars:
       - key: PORT
         value: 10000
+      - key: NODE_ENV
+        value: production
