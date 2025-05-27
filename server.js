@@ -13,7 +13,7 @@ const PORT = process.env.PORT || 10000;
 
 // Middleware
 app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, 'public')));  // Serve static files from public directory
+app.use(express.static(path.join(__dirname, 'public')));
 
 // PostgreSQL Connection Pool for Render.com
 const pool = new Pool({
@@ -32,7 +32,7 @@ pool.query('SELECT NOW()', (err, res) => {
   }
 });
 
-// Routes
+// Route for home page
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
