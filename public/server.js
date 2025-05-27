@@ -165,6 +165,11 @@ app.post('/admin/login', async (req, res) => {
   }
 });
 
+// Required for Render's health checks
+app.get('/health', (req, res) => {
+  res.status(200).send('OK');
+});
+
 // Protected admin route
 app.get('/admin/appointments', async (req, res) => {
   try {
