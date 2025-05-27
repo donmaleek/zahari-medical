@@ -7,39 +7,47 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const axios = require('axios');
 const crypto = require('crypto');
+const cors = require('cors');
 
 const app = express();
 const PORT = process.env.PORT || 10000;
 
 // Middleware
+app.use(cors());
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// PostgreSQL Connection Pool for Render.com
+// Database Connection
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL || 'postgresql://zahari_medical_user:60igfiGawV5EvLfc4oGMVyVzxUXFyeUa@dpg-d0qpqvh5pdvs73aqvehg-a.oregon-postgres.render.com/zahari_medical',
   ssl: {
-    rejectUnauthorized: false // Required for Render.com PostgreSQL
+    rejectUnauthorized: false
   }
 });
 
-// Test PostgreSQL Connection
-pool.query('SELECT NOW()', (err, res) => {
+// Test Database Connection
+pool.connect((err, client, release) => {
   if (err) {
-    console.error('PostgreSQL connection error:', err);
+    console.error('Error acquiring client', err.stack);
   } else {
-    console.log('Successfully connected to PostgreSQL at:', res.rows[0].now);
+    console.log('Successfully connected to PostgreSQL database');
+    release();
   }
 });
 
-// Route for home page
+// Health Check Endpoint (Required for Render)
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    database: 'connected'
+  });
+});
+
+// Main Routes
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
-// Health check endpoint for Render
-app.get('/health', (req, res) => {
-  res.status(200).send('OK');
 });
 
 // Patient Registration
@@ -47,220 +55,160 @@ app.post('/api/register', async (req, res) => {
   const { firstName, lastName, email, password, dob, phone } = req.body;
   
   try {
-    const existing = await pool.query('SELECT * FROM patients WHERE email = $1', [email]);
-    
-    if (existing.rows.length > 0) {
-      return res.status(400).json({ 
-        success: false,
-        message: 'Email already registered' 
-      });
+    // Check if user exists
+    const userExists = await pool.query('SELECT * FROM patients WHERE email = $1', [email]);
+    if (userExists.rows.length > 0) {
+      return res.status(400).json({ error: 'Email already registered' });
     }
-    
+
+    // Hash password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
-    
-    await pool.query(
+
+    // Insert new user
+    const newUser = await pool.query(
       `INSERT INTO patients (first_name, last_name, email, password, dob, phone) 
-      VALUES ($1, $2, $3, $4, $5, $6)`,
+       VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
       [firstName, lastName, email, hashedPassword, dob, phone]
     );
-    
-    res.status(201).json({ success: true, message: 'Registration successful' });
+
+    res.status(201).json({
+      success: true,
+      user: {
+        id: newUser.rows[0].id,
+        firstName: newUser.rows[0].first_name,
+        lastName: newUser.rows[0].last_name,
+        email: newUser.rows[0].email
+      }
+    });
   } catch (err) {
     console.error('Registration error:', err);
-    res.status(500).json({ 
-      success: false,
-      message: 'Registration failed',
-      error: err.message 
-    });
+    res.status(500).json({ error: 'Registration failed' });
   }
 });
 
 // Patient Login
 app.post('/api/login', async (req, res) => {
   const { email, password } = req.body;
-  
+
   try {
-    const users = await pool.query('SELECT * FROM patients WHERE email = $1', [email]);
-    
-    if (users.rows.length === 0) {
-      return res.status(401).json({ success: false, message: 'Invalid email or password' });
+    // Find user
+    const user = await pool.query('SELECT * FROM patients WHERE email = $1', [email]);
+    if (user.rows.length === 0) {
+      return res.status(401).json({ error: 'Invalid credentials' });
     }
-    
-    const user = users.rows[0];
-    const isMatch = await bcrypt.compare(password, user.password);
-    
+
+    // Check password
+    const isMatch = await bcrypt.compare(password, user.rows[0].password);
     if (!isMatch) {
-      return res.status(401).json({ success: false, message: 'Invalid email or password' });
+      return res.status(401).json({ error: 'Invalid credentials' });
     }
-    
+
+    // Create JWT token
     const token = jwt.sign(
-      { id: user.id, email: user.email },
-      process.env.JWT_SECRET || 'your_jwt_secret',
+      { id: user.rows[0].id, email: user.rows[0].email },
+      process.env.JWT_SECRET || 'your_jwt_secret_here',
       { expiresIn: '1h' }
     );
-    
-    res.json({ 
+
+    res.json({
       success: true,
-      message: 'Login successful',
       token,
       user: {
-        id: user.id,
-        firstName: user.first_name,
-        lastName: user.last_name,
-        email: user.email
+        id: user.rows[0].id,
+        firstName: user.rows[0].first_name,
+        lastName: user.rows[0].last_name,
+        email: user.rows[0].email
       }
     });
   } catch (err) {
     console.error('Login error:', err);
-    res.status(500).json({ 
-      success: false,
-      message: 'Login failed',
-      error: err.message 
-    });
+    res.status(500).json({ error: 'Login failed' });
   }
 });
 
-// Admin login
-app.post('/admin/login', async (req, res) => {
-  if (req.body.username === 'admin' && req.body.password === 'securepassword123') {
-    const token = jwt.sign({ role: 'admin' }, process.env.ADMIN_JWT_SECRET || 'admin-secret-key');
-    res.json({ token });
-  } else {
-    res.status(401).send('Invalid credentials');
+// Admin Routes
+app.post('/admin/login', (req, res) => {
+  const { username, password } = req.body;
+  
+  if (username === 'admin' && password === 'securepassword123') {
+    const token = jwt.sign(
+      { role: 'admin' }, 
+      process.env.ADMIN_JWT_SECRET || 'admin_secret_here',
+      { expiresIn: '1h' }
+    );
+    return res.json({ token });
   }
+  
+  res.status(401).json({ error: 'Invalid credentials' });
 });
 
-// Protected admin route
-app.get('/admin/appointments', async (req, res) => {
-  try {
-    const appointments = await pool.query(`
-      SELECT a.*, p.first_name || ' ' || p.last_name as patient_name 
-      FROM appointments a
-      JOIN patients p ON a.patient_id = p.id
-      ORDER BY a.appointment_date DESC
-      LIMIT 50
-    `);
-    res.json(appointments.rows);
-  } catch (err) {
-    res.status(500).send('Database error');
-  }
-});
-
-// M-Pesa configuration
+// M-Pesa Payment Integration
 const mpesaConfig = {
   consumerKey: process.env.MPESA_CONSUMER_KEY,
   consumerSecret: process.env.MPESA_CONSUMER_SECRET,
   passKey: process.env.MPESA_PASSKEY,
   businessShortCode: process.env.MPESA_BUSINESS_SHORTCODE,
-  callbackUrl: process.env.MPESA_CALLBACK_URL,
+  callbackUrl: process.env.MPESA_CALLBACK_URL || 'https://yourdomain.com/mpesa-callback',
   accountReference: process.env.MPESA_ACCOUNT_REFERENCE || 'ZAHARI_MEDICAL'
 };
 
-// M-Pesa payment functions
-async function getMpesaAccessToken() {
-  try {
-    const auth = Buffer.from(`${mpesaConfig.consumerKey}:${mpesaConfig.consumerSecret}`).toString('base64');
-    const response = await axios.get('https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials', {
-      headers: { Authorization: `Basic ${auth}` }
-    });
-    return response.data.access_token;
-  } catch (error) {
-    console.error('Error getting M-Pesa access token:', error);
-    throw error;
-  }
-}
-
-async function lipaNaMpesaOnline(phone, amount) {
-  try {
-    const accessToken = await getMpesaAccessToken();
-    const timestamp = new Date().toISOString().replace(/[-:.]/g, '').slice(0, -3);
-    const password = Buffer.from(`${mpesaConfig.businessShortCode}${mpesaConfig.passKey}${timestamp}`).toString('base64');
-    
-    const requestData = {
-      BusinessShortCode: mpesaConfig.businessShortCode,
-      Password: password,
-      Timestamp: timestamp,
-      TransactionType: 'CustomerPayBillOnline',
-      Amount: amount,
-      PartyA: phone,
-      PartyB: mpesaConfig.businessShortCode,
-      PhoneNumber: phone,
-      CallBackURL: mpesaConfig.callbackUrl,
-      AccountReference: mpesaConfig.accountReference,
-      TransactionDesc: 'Payment for medical services'
-    };
-
-    const response = await axios.post('https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest', requestData, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        'Content-Type': 'application/json'
-      }
-    });
-
-    return response.data;
-  } catch (error) {
-    console.error('Error initiating M-Pesa payment:', error.response?.data || error.message);
-    throw error;
-  }
-}
-
-// M-Pesa routes
-app.post('/initiate-mpesa-payment', async (req, res) => {
+app.post('/initiate-payment', async (req, res) => {
   try {
     const { phone, amount } = req.body;
-    if (!phone || !amount) {
-      return res.status(400).json({ error: 'Phone and amount are required' });
-    }
+    const formattedPhone = `254${phone.substring(phone.length - 9)}`;
+    
+    const token = await getMpesaToken();
+    const timestamp = new Date().toISOString().replace(/[-:.]/g, '');
+    const password = Buffer.from(`${mpesaConfig.businessShortCode}${mpesaConfig.passKey}${timestamp}`).toString('base64');
 
-    const formattedPhone = phone.replace(/\D/g, '').replace(/^0/, '254');
-    const response = await lipaNaMpesaOnline(formattedPhone, amount);
-    res.json(response);
-  } catch (err) {
-    res.status(500).json({ 
-      error: err.message,
-      details: err.response?.data || 'M-Pesa payment initiation failed'
-    });
+    const response = await axios.post(
+      'https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest',
+      {
+        BusinessShortCode: mpesaConfig.businessShortCode,
+        Password: password,
+        Timestamp: timestamp,
+        TransactionType: 'CustomerPayBillOnline',
+        Amount: amount,
+        PartyA: formattedPhone,
+        PartyB: mpesaConfig.businessShortCode,
+        PhoneNumber: formattedPhone,
+        CallBackURL: mpesaConfig.callbackUrl,
+        AccountReference: mpesaConfig.accountReference,
+        TransactionDesc: 'Medical Services Payment'
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+    res.json(response.data);
+  } catch (error) {
+    console.error('Payment error:', error.response?.data || error.message);
+    res.status(500).json({ error: 'Payment processing failed' });
   }
 });
 
-app.post('/mpesa-callback', (req, res) => {
-  const callbackData = req.body;
-  console.log('M-Pesa Callback Received:', callbackData);
-  
-  if (callbackData.Body.stkCallback.ResultCode === '0') {
-    const items = callbackData.Body.stkCallback.CallbackMetadata.Item;
-    console.log(`Payment successful:
-      Amount: ${items.find(i => i.Name === 'Amount').Value}
-      Receipt: ${items.find(i => i.Name === 'MpesaReceiptNumber').Value}
-      Phone: ${items.find(i => i.Name === 'PhoneNumber').Value}`);
-  } else {
-    console.log(`Payment failed: ${callbackData.Body.stkCallback.ResultDesc}`);
-  }
+async function getMpesaToken() {
+  const auth = Buffer.from(`${mpesaConfig.consumerKey}:${mpesaConfig.consumerSecret}`).toString('base64');
+  const response = await axios.get(
+    'https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials',
+    { headers: { Authorization: `Basic ${auth}` } }
+  );
+  return response.data.access_token;
+}
 
-  res.status(200).send();
-});
-
-// Contact Form Submission
-app.post('/submit-contact', async (req, res) => {
-  const { name, email, message } = req.body;
-  try {
-    await pool.query('INSERT INTO contacts (name, email, message) VALUES ($1, $2, $3)', [name, email, message]);
-    res.json({ success: true, message: 'Message received! We will contact you soon.' });
-  } catch (err) {
-    res.status(500).json({ success: false, message: 'Database error' });
-  }
-});
-
-// Error handling middleware
+// Error Handling Middleware
 app.use((err, req, res, next) => {
-  if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
-    return res.status(400).json({ success: false, message: 'Invalid JSON payload' });
-  }
-  next();
+  console.error(err.stack);
+  res.status(500).json({ error: 'Something broke!' });
 });
 
 // Start Server
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`Server running on port ${PORT}`);
+  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
 });
