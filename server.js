@@ -13,8 +13,7 @@ const PORT = process.env.PORT || 10000;
 
 // Middleware
 app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, '.')));
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public')));  // Serve static files from public directory
 
 // PostgreSQL Connection Pool for Render.com
 const pool = new Pool({
@@ -24,16 +23,10 @@ const pool = new Pool({
   }
 });
 
-// Enhanced connection test
+// Test PostgreSQL Connection
 pool.query('SELECT NOW()', (err, res) => {
   if (err) {
     console.error('PostgreSQL connection error:', err);
-    console.log('Attempting to connect to:', {
-      host: pool.options.host,
-      port: pool.options.port,
-      database: pool.options.database,
-      user: pool.options.user
-    });
   } else {
     console.log('Successfully connected to PostgreSQL at:', res.rows[0].now);
   }
@@ -41,7 +34,12 @@ pool.query('SELECT NOW()', (err, res) => {
 
 // Routes
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// Health check endpoint for Render
+app.get('/health', (req, res) => {
+  res.status(200).send('OK');
 });
 
 // Patient Registration
@@ -49,11 +47,7 @@ app.post('/api/register', async (req, res) => {
   const { firstName, lastName, email, password, dob, phone } = req.body;
   
   try {
-    // Check if user already exists
-    const existing = await pool.query(
-      'SELECT * FROM patients WHERE email = $1', 
-      [email]
-    );
+    const existing = await pool.query('SELECT * FROM patients WHERE email = $1', [email]);
     
     if (existing.rows.length > 0) {
       return res.status(400).json({ 
@@ -62,21 +56,16 @@ app.post('/api/register', async (req, res) => {
       });
     }
     
-    // Hash password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
     
     await pool.query(
-      `INSERT INTO patients 
-      (first_name, last_name, email, password, dob, phone) 
+      `INSERT INTO patients (first_name, last_name, email, password, dob, phone) 
       VALUES ($1, $2, $3, $4, $5, $6)`,
       [firstName, lastName, email, hashedPassword, dob, phone]
     );
     
-    res.status(201).json({ 
-      success: true,
-      message: 'Registration successful' 
-    });
+    res.status(201).json({ success: true, message: 'Registration successful' });
   } catch (err) {
     console.error('Registration error:', err);
     res.status(500).json({ 
@@ -92,31 +81,19 @@ app.post('/api/login', async (req, res) => {
   const { email, password } = req.body;
   
   try {
-    // Find user by email
-    const users = await pool.query(
-      'SELECT * FROM patients WHERE email = $1',
-      [email]
-    );
+    const users = await pool.query('SELECT * FROM patients WHERE email = $1', [email]);
     
     if (users.rows.length === 0) {
-      return res.status(401).json({ 
-        success: false,
-        message: 'Invalid email or password' 
-      });
+      return res.status(401).json({ success: false, message: 'Invalid email or password' });
     }
     
     const user = users.rows[0];
-    
-    // Compare passwords
     const isMatch = await bcrypt.compare(password, user.password);
+    
     if (!isMatch) {
-      return res.status(401).json({ 
-        success: false,
-        message: 'Invalid email or password' 
-      });
+      return res.status(401).json({ success: false, message: 'Invalid email or password' });
     }
     
-    // Create JWT token
     const token = jwt.sign(
       { id: user.id, email: user.email },
       process.env.JWT_SECRET || 'your_jwt_secret',
@@ -144,17 +121,6 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
-// JSON parse error handling middleware
-app.use((err, req, res, next) => {
-  if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
-    return res.status(400).json({ 
-      success: false,
-      message: 'Invalid JSON payload' 
-    });
-  }
-  next();
-});
-
 // Admin login
 app.post('/admin/login', async (req, res) => {
   if (req.body.username === 'admin' && req.body.password === 'securepassword123') {
@@ -163,11 +129,6 @@ app.post('/admin/login', async (req, res) => {
   } else {
     res.status(401).send('Invalid credentials');
   }
-});
-
-// Required for Render's health checks
-app.get('/health', (req, res) => {
-  res.status(200).send('OK');
 });
 
 // Protected admin route
@@ -196,14 +157,12 @@ const mpesaConfig = {
   accountReference: process.env.MPESA_ACCOUNT_REFERENCE || 'ZAHARI_MEDICAL'
 };
 
-// Generate M-Pesa access token
+// M-Pesa payment functions
 async function getMpesaAccessToken() {
   try {
     const auth = Buffer.from(`${mpesaConfig.consumerKey}:${mpesaConfig.consumerSecret}`).toString('base64');
     const response = await axios.get('https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials', {
-      headers: {
-        Authorization: `Basic ${auth}`
-      }
+      headers: { Authorization: `Basic ${auth}` }
     });
     return response.data.access_token;
   } catch (error) {
@@ -212,7 +171,6 @@ async function getMpesaAccessToken() {
   }
 }
 
-// Lipa Na M-Pesa Online function
 async function lipaNaMpesaOnline(phone, amount) {
   try {
     const accessToken = await getMpesaAccessToken();
@@ -255,9 +213,7 @@ app.post('/initiate-mpesa-payment', async (req, res) => {
       return res.status(400).json({ error: 'Phone and amount are required' });
     }
 
-    // Validate phone number format
     const formattedPhone = phone.replace(/\D/g, '').replace(/^0/, '254');
-    
     const response = await lipaNaMpesaOnline(formattedPhone, amount);
     res.json(response);
   } catch (err) {
@@ -271,26 +227,15 @@ app.post('/initiate-mpesa-payment', async (req, res) => {
 app.post('/mpesa-callback', (req, res) => {
   const callbackData = req.body;
   console.log('M-Pesa Callback Received:', callbackData);
-
-  // Verify the callback is from M-Pesa
-  const resultCode = callbackData.Body.stkCallback.ResultCode;
-  const resultDesc = callbackData.Body.stkCallback.ResultDesc;
   
-  if (resultCode === '0') {
-    // Successful payment
+  if (callbackData.Body.stkCallback.ResultCode === '0') {
     const items = callbackData.Body.stkCallback.CallbackMetadata.Item;
-    const amount = items.find(item => item.Name === 'Amount').Value;
-    const mpesaReceiptNumber = items.find(item => item.Name === 'MpesaReceiptNumber').Value;
-    const phoneNumber = items.find(item => item.Name === 'PhoneNumber').Value;
-    
     console.log(`Payment successful:
-      Amount: ${amount}
-      Receipt: ${mpesaReceiptNumber}
-      Phone: ${phoneNumber}`);
-    
-    // TODO: Update your database with payment details
+      Amount: ${items.find(i => i.Name === 'Amount').Value}
+      Receipt: ${items.find(i => i.Name === 'MpesaReceiptNumber').Value}
+      Phone: ${items.find(i => i.Name === 'PhoneNumber').Value}`);
   } else {
-    console.log(`Payment failed: ${resultDesc}`);
+    console.log(`Payment failed: ${callbackData.Body.stkCallback.ResultDesc}`);
   }
 
   res.status(200).send();
@@ -300,20 +245,19 @@ app.post('/mpesa-callback', (req, res) => {
 app.post('/submit-contact', async (req, res) => {
   const { name, email, message } = req.body;
   try {
-    const result = await pool.query(
-      'INSERT INTO contacts (name, email, message) VALUES ($1, $2, $3)',
-      [name, email, message]
-    );
-    res.json({ 
-      success: true,
-      message: 'Message received! We will contact you soon.' 
-    });
+    await pool.query('INSERT INTO contacts (name, email, message) VALUES ($1, $2, $3)', [name, email, message]);
+    res.json({ success: true, message: 'Message received! We will contact you soon.' });
   } catch (err) {
-    res.status(500).json({ 
-      success: false,
-      message: 'Database error' 
-    });
+    res.status(500).json({ success: false, message: 'Database error' });
   }
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
+    return res.status(400).json({ success: false, message: 'Invalid JSON payload' });
+  }
+  next();
 });
 
 // Start Server
